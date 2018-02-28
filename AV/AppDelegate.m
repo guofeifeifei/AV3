@@ -7,8 +7,12 @@
 //
 
 #import "AppDelegate.h"
-
-@interface AppDelegate ()
+#import <Hyphenate/Hyphenate.h>
+#import "MessageViewController.h"
+@interface AppDelegate (){
+    UIBackgroundTaskIdentifier taskId;
+    int count;
+}
 
 @end
 
@@ -16,10 +20,53 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+    //AppKey:注册的AppKey，详细见下面注释。
+    //apnsCertName:推送证书名（不需要加后缀），详细见下面注释。
+    EMOptions *options = [EMOptions optionsWithAppkey:@"1195170609115439#sakuraphonereceive"];
+    options.apnsCertName = @"istore_dev";
+    [[EMClient sharedClient] initializeSDKWithOptions:options];
+    //baiduyun
+    
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    MessageViewController *imageView = [[MessageViewController alloc] initWithNibName:@"MessageViewController" bundle:nil];
+        self.window.rootViewController = imageView;
+        [self.window makeKeyAndVisible];
+//
     return YES;
 }
-
+// APP进入后台
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+    [[EMClient sharedClient] applicationDidEnterBackground:application];
+    //开启一个后台任务
+    taskId = [application beginBackgroundTaskWithExpirationHandler:^{
+        
+        //结束指定的任务
+        [application endBackgroundTask:taskId];
+    }];
+    
+    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timerAction:) userInfo:nil repeats:YES];
+}
+- (void)timerAction:(NSTimer *)timer {
+    
+    count++;
+    
+    if (count % 500 == 0) {
+        UIApplication *application = [UIApplication sharedApplication];
+        //结束旧的后台任务
+        [application endBackgroundTask:taskId];
+        
+        //开启一个新的后台
+        taskId = [application beginBackgroundTaskWithExpirationHandler:NULL];
+    }
+    
+    NSLog(@"%d",count);
+}
+// APP将要从后台返回
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+    [[EMClient sharedClient] applicationWillEnterForeground:application];
+}
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -27,15 +74,6 @@
 }
 
 
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-}
-
-
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-    // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-}
 
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {

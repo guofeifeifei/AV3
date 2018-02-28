@@ -1,0 +1,21 @@
+//
+//  PrefixHeader.pch
+//  AV
+//
+//  Created by ZZCN77 on 2017/9/23.
+//  Copyright © 2017年 ZZCN77. All rights reserved.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+/******* 日志打印替换 *******/
+#ifdef DEBUG
+// Debug
+#define NSLog(FORMAT, ...) fprintf(stderr, "%s [%d lines] %s\n", __PRETTY_FUNCTION__, __LINE__, [[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
+#else
+// Release
+#define NSLog(FORMAT, ...) nil
+#endif
+/******* 日志打印替换 *******/
+#endif /* PrefixHeader_pch */
